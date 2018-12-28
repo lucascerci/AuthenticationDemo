@@ -26,6 +26,8 @@ app.use(require("express-session")({
 app.use(passport.initialize());
 app.use(passport.session());
 
+//Creating a new local strategy using the user.authenticate method thats comming from passportLocalMongoose on user.js
+passport.use(new LocalStrategy(User.authenticate()));
 
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
@@ -64,12 +66,26 @@ app.post("/register", function(req, res){
             console.log(err);
             return res.render('register');
         }else{
-            //that line will log the user in, it will take care of everything in the session. -> Store the correct information and run the serialize previusly defined on line 30/31
+            //that line will log the user in, it will take care of everything in the session. -> Store the correct information and run the serialize previusly defined on line 32/33
             passport.authenticate("local")(req, res, function(){
                 res.redirect("/secret");
             });
         }
     });
+});
+
+//LOGIN ROUTES
+//render login form
+app.get("/login", function(req, res){
+    res.render("login");
+});
+
+//login logic
+//middleware is some code that runs before our final route callback 
+app.post("/login", passport.authenticate("local", {
+    successRedirect: "/secret",
+    failureRedirect: "/login"
+}) ,function(req, res){
 });
 
 
